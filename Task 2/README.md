@@ -6,7 +6,7 @@ This Python program presents a menu with several options to perform various math
 
 1. **Vectors: Mode Calculation**
 2. **Strings: Average Occurrence of Vowels**
-3. **Matrices: Values Less Than the Mean**
+3. **Matrix: Values Less Than the Mean**
 4. **Exit**
 
 The user can select an option by entering the corresponding number, and the program will execute the related task. If the user does not choose option 4 (Exit), the menu will be displayed again. The program will continue running until the user selects the exit option.
@@ -48,7 +48,7 @@ markdown
 Copiar
 Editar
 
-### Option 3: Matrices - Values Less Than the Mean
+### Option 3: Matrix - Values Less Than the Mean
 
 - The program will read a matrix of **dimensions m x n**, where:
 - **1 < m < 7** (rows)
