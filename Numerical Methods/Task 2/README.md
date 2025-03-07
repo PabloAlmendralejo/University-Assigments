@@ -16,18 +16,6 @@ This Fortran program implements the **Bisection Method** and **False Position Me
 - Intervals `[a1, a2]` and `[b1, b2]` for both functions.
 - Precision (`c1`, `c2`) and iteration count parameters.
 
-## Compilation
-
-1. Save the code to `root_finding_program.f90`.
-2. Compile using `gfortran`:
-   ```bash
-   gfortran root_finding_program.f90 -o root_finding_program
-   ```
-3. Run the compiled program:
-   ```bash
-   ./root_finding_program
-   ```
-
 ## Example Input
 Input for Function 1:
 ```
