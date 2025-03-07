@@ -59,5 +59,3 @@ Root: 2.000000123
 ## License
 Free to modify and distribute under the terms of your choice.
 
-## Contact
-For questions or suggestions, feel free to reach out.
