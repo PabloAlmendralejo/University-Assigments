@@ -1,1 +1,1 @@
-
+This course introduces students to structured programming, providing fundamental knowledge in algorithms and essential data structures such as arrays, matrices, and records, without delving into object-oriented programming. It develops skills to apply programming in solving problems in Mathematics, Physics, and Statistics, using Python as the primary language
