@@ -126,6 +126,11 @@ Input:
 ini = [2, 2, 2]  # Initial condition
 t = 1            # Time range
 n = 100          # Number of steps
+```
+
 Output:
+
+```python
 CopiarMétodo de Taylor con 100 pasos para t=1: [5.388804626893486, 2.7801087707195835, -3.2130548101272622]
 Método de Runge-Kutta con 100 pasos para t=1: [5.365883939049152, 2.7635465814003455, -3.204674715297616]
+```
