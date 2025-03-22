@@ -1,4 +1,3 @@
-# README
 ## Fortran Numerical Integration and Interpolation Program
 
 ### Overview
