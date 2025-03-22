@@ -1,0 +1,517 @@
+---
+title: "Examen_Econ"
+format: html
+editor: visual
+---
+
+## Quarto
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+## Running Code
+
+When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+
+```{r}
+# 1º
+library(readxl)
+library(reticulate)
+
+renta <- read_xlsx("ADRH2022_INE.xlsx")
+# comprobarmos que hemos cargado bien los datos
+head(renta)
+summary(renta)
+
+# estudio descriptivo de renta_neta_media_pp:
+
+summary(renta$renta_neta_media_pp)
+```
+
+Observamos que la renta neta mínima toma un valor de 6274 euros mientras que la máxima es de 29258 euros, hay una gran variación entre la renta mínima y la máxima, con una diferencia de un 500%, por otra parte el valor medio, 13490 y el mediano, 13340 son bastante similares, indicador de que la distribución tiene cierta simetría. por otra parte el percentil 25 toma un valor de 11663 y el percentil 75 un valor de 15104, lo cual indica que no hay mucha dispersión en los datos centrales pues estos estan bastante cercanos a la media y el percentil 50, como el percentil 25 está mas cerca del mínimo que el percentil 75 del máximo sospechamos que la distribución debe presentar una cola a su derecha.
+
+Provamos a representar graficamente la distribución:
+
+```{r}
+hist(renta$renta_neta_media_pp)
+```
+
+El histograma confirma nuestras sospechas, es una distribución simétrica con una cola hacia la derecha.
+
+```{python}
+# 1º
+renta_py = r.renta
+renta_py.describe()
+renta_py.renta_neta_media_pp.describe()
+```
+
+```{r}
+# 2º
+library(dplyr)
+
+mayor_renta <- renta %>%
+  arrange(desc(renta_neta_media_pp)) %>%
+  slice(1:10)
+
+menor_renta <- renta %>%
+  arrange(renta_neta_media_pp) %>%
+  slice(1:10)
+
+print("Municipios con mayor renta neta anual media:")
+print(mayor_renta$municipio)
+
+print("Municipios con menor renta neta anual media:")
+print(menor_renta$municipio)
+```
+
+```{python}
+# 2º
+mayor_renta_py = renta_py.sort_values(by="renta_neta_media_pp", ascending=False).head(10)
+
+
+menor_renta_py = renta_py.sort_values(by="renta_neta_media_pp").head(10)
+
+
+print(mayor_renta_py["municipio"])
+
+print(menor_renta_py["municipio"])
+```
+
+```{r}
+# 3º
+library(geojsonsf)
+library(sf)
+library(dplyr )
+library(ggplot2)
+library(viridis)
+
+municipios <- geojson_sf("munESPmap.geojson")
+
+class(municipios)
+
+str(municipios)
+
+datos_renta_per_capita_medias <- renta %>%
+  group_by(`municipio`) %>%
+  summarize(renta_media = mean(`renta_neta_media_pp`))
+
+datos_map <- datos_renta_per_capita_medias %>% 
+    rename(name = municipio)
+
+datos_geo <- inner_join(municipios, datos_map, by = "name")
+
+ggplot(datos_geo) +
+  geom_sf(aes(fill=renta_media)) +
+  theme_bw() +
+  labs(title = "Renta per capita por municipio") +
+  scale_fill_viridis(option="plasma")
+```
+
+```{python}
+#3º
+
+import geopandas as gpd
+import pandas as pd
+import matplotlib.pyplot as plt
+from matplotlib.colors import Normalize
+from matplotlib import cm
+
+municipios = gpd.read_file("munESPmap.geojson")
+
+print(municipios.info())
+print(municipios.head())
+
+datos_renta_per_capita_medias = renta_py.groupby("municipio", as_index=False).agg(renta_media=("renta_neta_media_pp", "mean"))
+
+datos_renta_per_capita_medias = datos_renta_per_capita_medias.rename(columns={"municipio": "name"})
+
+
+datos_geo = municipios.merge(datos_renta_per_capita_medias, on="name", how="inner")
+
+
+fig ,ax = plt.subplots(1, 1, figsize=(10, 10))
+
+datos_geo.plot(column="renta_media",cmap="plasma",linewidth=0.8,ax=ax,edgecolor="black",)
+
+plt.title("Renta per cápita por municipio")
+plt.tight_layout()
+
+plt.show()
+```
+
+Segundo Ejercicio
+
+```{r}
+
+#1º
+
+library(readxl)
+
+onu <- read_xlsx("HDI2022_ONU.xlsx")
+
+head(onu)
+
+str(onu)
+
+# Las variables cuantitativas son LEB,EYS,GNIPC,HDI.
+
+# LEB:
+
+summary(onu$LEB)
+
+```
+
+Observamos que la media y la mediana son bastantes similares, lo cual es un signo de simetría de la distribución, por otra parte el máximo y mínimo no distan mucho de media (un 20%) lo que indica que la distribución no tiene colas muy largas, además ambos extremos distan de la media una cantidad parecida, por otra parte los percentiles 25 y 75 rambien equidistan de la mediana y la media, lo cual aumenta a un más la simetría de la distribución.
+
+```{r}
+summary(onu$EYS)
+```
+
+Al igual que en el caso anterior, la media y la mediana son bastante similares, síntoma de simetría en la distribución, en este caso la variación de la media con respecto a los extremos es algo mayor, de un 250% en el mínimo y 90% en el máximo, esto indica que la distribución presenta una cola por la izquierda. por otra parte los cuantiles 1 y 3 estan bastante cerca de la media, lo que indica que la densidad de la distribución está astante concentrada entorno a la media.
+
+```{r}
+summary(onu$GNIPC)
+```
+
+En este caso la media y la mediana son bastante distantes, indicativo de que la dsitribución presenta asimetría, además el mínimo y el máximo distan mucho de la media y mediana, lo cualindica que se trata de una distribución muy alargada, el hecho de que los cuantiles 1 y 3 estan bastante alejados de la media y mediana refuerza nuestra hipótesis de que es una distribución con poca densidad alrededor de los valores centrales, es decir, es una distribución "achatada", hacia que lado? como la mediana es menor que la media esto indica que la mayoría de los valores se concentran a la izquierda de la media, es decir, la distribución tiene una cola muy larga hacia la derecha.
+
+```{r}
+
+summary(onu$HDI)
+```
+
+La media y la mediana tienen valores batante similares, indicativo de que la distribución presenta cierta simetría. por otra parte el mínimo dista más de la media que el máximo, lo cual indica que la distribución presentará una cola más larga hacia la izquierda que hacia la derecha, además el Q1 dista más de la mediana que el Q3, lo cual quiere decir que la dsitribución tiene cierto "skew" hacia la izquierda.
+
+```{python}
+
+onu_py = r.onu
+
+onu_py.describe()
+
+onu_py.LEB.describe()
+onu_py.EYS.describe()
+onu_py.GNIPC.describe()
+onu_py.HDI.describe()
+
+```
+
+```{r}
+#2º
+library(GGally)
+colnames(onu)
+GGally::ggpairs(onu[,c("LEB", "EYS", "GNIPC", "HDI")])
+
+```
+
+```{r}
+ggplot(onu, aes(x =LEB , y = HDI)) +
+  geom_point() +
+  geom_smooth(method='lm', formula = y~x, se = FALSE) +
+  xlab("LEB") +
+  ylab("HDI") +
+  theme_minimal()
+```
+
+```{r}
+ggplot(onu, aes(x =EYS , y = HDI)) +
+  geom_point() +
+  geom_smooth(method='lm', formula = y~x, se = FALSE) +
+  xlab("EYS") +
+  ylab("HDI") +
+  theme_minimal()
+```
+
+```{r}
+ggplot(onu, aes(x =GNIPC , y = HDI)) +
+  geom_point() +
+  geom_smooth(method='lm', formula = y~x, se = FALSE) +
+  xlab("GNIPC") +
+  ylab("HDI") +
+  theme_minimal()
+```
+
+La relación entre HDI y LEB y EYS parece ser lineal mientras que la relación entre HDI e GNIPC presenta una cola muy fuerte a la izquierda de la gráfica, lo cual indica que puede resultar convenietne aplicar una transformación logrítmica.
+
+```{python}
+
+import seaborn as sb
+
+sb.pairplot(data = onu_py, diag_kind = 'kde');
+plt.show()
+```
+
+```{python}
+(ggplot(onu_py,aes('LEB','HDI')) + 
+geom_point() + 
+geom_smooth(method='lm',se=False, color = "blue") + 
+labs(x="LEB",y="HDI") + theme_bw())
+```
+
+```{python}
+(ggplot(onu_py,aes('EYS','HDI')) + 
+geom_point() + 
+geom_smooth(method='lm',se=False, color = "blue") + 
+labs(x="EYS",y="HDI") + theme_bw())
+```
+
+```{python}
+
+(ggplot(onu_py,aes('GNIPC','HDI')) + 
+geom_point() + 
+geom_smooth(method='lm',se=False, color = "blue") + 
+labs(x="GNIPC",y="HDI") + theme_bw())
+```
+
+```{r}
+#3º
+library(gvlma)
+library(lmtest)
+library(performance)
+library(alr4)
+
+modelo_MCO <- lm(HDI ~ LEB + EYS + log(GNIPC) , data = onu)
+
+summary(gvlma(modelo_MCO))
+
+resettest(modelo_MCO, power = 2)
+
+model_performance(modelo_MCO)
+
+check_model(modelo_MCO)
+
+residualPlots(modelo_MCO)
+
+crPlots(modelo_MCO)
+```
+
+```{python}
+import numpy as np
+import pandas as pd
+import statsmodels.api as sm
+import statsmodels.formula.api as smf
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+modelo_MCO = smf.ols("HDI ~ LEB + EYS + np.log(GNIPC)", data=onu_py).fit()
+
+print(modelo_MCO.summary())
+
+reset_ramsey(modelo_MCO,degree=2)
+
+fig = sm.graphics.plot_partregress_grid(modelo_MCO)
+fig.tight_layout(pad=1.0)
+plt.show()
+
+fig = sm.graphics.plot_ccpr_grid(modelo_MCO)
+fig.tight_layout(pad=1.0)
+plt.show()
+```
+
+Tras aplicar el test de Peña y Slate observamos que el modelo no se ajusta bien a los datos, para confirmar nuestras sospechas aplicamos el test de Reset de grado 2, este arrojaun resultado significativo, es decir, puede que exista una relación de forma cúbica entre los datos. Para estudiar que está ocurriendo estudiamos los residuos del modelo, pues estos nos indcan que aprte de la varaibilidad no está captando el modelo, observamos que todos sigeun un patron parabólico, es decir, hay alguna variable que tiene un compratmientopolinómico que no estamos capatando, para estudiar cual de esas variables es la que presenta un comportamiento parabólico representamos graficamente los residuos parciales, podemos observar que la variable que dá problemas es EYS, pues esta muestra una tendencia parabólica. Para solucionar este problema ajustamos el nuevo modelo:
+
+```{r}
+#4º
+
+modelo_2 <- lm(HDI ~ LEB + EYS + log(GNIPC) + I(EYS^2) , data = onu )
+
+summary(modelo_2)
+
+summary(gvlma(modelo_2))
+
+check_model(modelo_2)
+
+residualPlots(modelo_2)
+
+crPlots(modelo_2)
+```
+
+```{python}
+modelo_2 = smf.ols("HDI ~ LEB + EYS + np.log(GNIPC) + I(EYS**2)", data=onu_py).fit()
+
+print(modelo_2.summary())
+
+fig = sm.graphics.plot_partregress_grid(modelo_2)
+fig.tight_layout(pad=1.0)
+plt.show()
+
+fig = sm.graphics.plot_ccpr_grid(modelo_2)
+fig.tight_layout(pad=1.0)
+plt.show()
+```
+
+Ahora podemos observar que todos los residuos tienen una tendencia lineal, indicativo de que el modelo se ajusta bien a los datos, además el test de Peña y Stale valida todas las hipótesis del modelo.
+
+```{python}
+
+reset_ramsey(modelo_MCO)
+reset_ramsey(modelo_MCO,degree=2)
+reset_ramsey(modelo_MCO,degree=3)
+
+```
+
+```{r}
+resettest(modelo_2)
+resettest(modelo_2, power = 2)
+resettest(modelo_2, power = 3)
+```
+
+Obtenemos un resultado significativo, es decir, la forma funcional del modelo no es la adecuada, si probamos a añadir términos cuadráticos obtenemos un resultado significativo, es decir, no hay evidencia para afirmar que los términos cuadráticos mejoren la forma funcional del modelo, en cambio, si añadimos términos cúbicos obtenemos resultados significativo,es decir, en este caso el modelo sí que mejoraría.
+
+Contrastamos la normalidad:
+
+```{r}
+library(tseries)
+jarque.bera.test(modelo_2$residuals)
+```
+
+```{python}
+import statsmodels.stats.api as sms
+
+name = ["Jarque-Bera"]
+test = sms.jarque_bera(modelo_2.resid)
+lzip(name, test)
+```
+
+Obtenemos un resultado significativo, es decir, podemos suponer normalidad de los residuos, esto es algo que ya hemos contrastado con el test de Peña y Stale y que además hemos podido comprobar graficamente al representar los residuos.
+
+```{r}
+library(skedastic)
+library(sandwich)
+
+breusch_pagan(modelo_2)
+```
+
+```{python}
+
+import statsmodels.api as sm
+import statsmodels.stats.api as sms
+import pandas as pd
+import numpy as np
+
+BP_test = smsdiag.het_breuschpagan(modelo_2.resid, modelo_2.model.exog)
+print(pd.DataFrame([np.round(BP_test, 8)], columns=name))
+```
+
+Obtenemos un resultado significativo, es decir, podemos suponer que los residuos son heterocedásticos, es decir, no dependen de ninguna variable del modelo.
+
+```{r}
+
+library(corrplot)
+attach(onu)
+X <- data.frame(LEB , EYS, GNIPC)
+cor(X)
+corrplot(cor(X))
+
+```
+
+```{python}
+
+X = onu.iloc[:,3:]
+X = X[["LEB" , "EYS", "GNIPC"]]
+X.corr().round(2)
+sns.heatmap(X.corr(), vmin=-0.25, vmax=0.25, center=0, annot=True, fmt='.2f', mask=~np.tri(X.corr().shape[1], k=-1, dtype=bool), cbar=False)
+plt.show()
+```
+
+Existe cierta correlación lineal positiva entre las variables LEB, EYS y GNIPC, con un r\^2 de 0.7, es decir, una correlación media/fuerte, lo cual puede provocar problemas de multicolinealidad en el modelo, para ello calculemos los factores fiv de las variables del modelo:
+
+```{r}
+vif(modelo_2)
+```
+
+```{python}
+from statsmodels.stats.outliers_influence import variance_inflation_factor
+for i in range(1, modelo_2.model.exog.shape[1]): print(variance_inflation_factor(modelo_2.model.exog, i))
+```
+
+Como era de esperar, las variables EYS y EYS\^2 estan fuertemente correlacionadas, pero no nos preocupa ya que hemos visto que este término cuadrático aporta un mejor ajuste del modelo, en cambio las variables LEB y log(GNIPC) muestran unos coeficientes VIF cercanosa a 5, lo cual indica una correlación moderada con el resto de las variables del modelo, si alguno de estos valores fuese mayor que 5 nos podríamos plantear eliminarlas del modelo.
+
+```{r}
+
+summary(lm(HDI ~LEB + EYS + log(GNIPC) + I(EYS^2), data = onu[which(HDI<=80),]))
+
+summary(lm(HDI ~LEB + EYS + log(GNIPC) + I(EYS^2), data = onu[which(HDI>80),]))
+
+onu$HDI_dum <- ifelse(onu$HDI <=80, 1, 0)
+
+modelo_dum <- lm(HDI ~( LEB + EYS + log(GNIPC) + I(EYS^2))*HDI_dum, data = onu)
+
+anova(modelo_2,modelo_dum)
+
+```
+
+```{python}
+import pandas as pd
+import statsmodels.api as sm
+import statsmodels.formula.api as smf
+import numpy as np
+
+
+modelo_1 = smf.ols('HDI ~ LEB + EYS + np.log(GNIPC) + I(EYS**2)', data=onu[onu['HDI'] <= 80]).fit()
+
+modelo_2 = smf.ols('HDI ~ LEB + EYS + np.log(GNIPC) + I(EYS**2)', data=onu[onu['HDI'] > 80]).fit()
+
+
+modelo_1.summary()
+
+modelo_2.summary()
+
+onu['HDI_dum'] = np.where(onu['HDI'] <= 80, 1, 0)
+
+
+modelo_dum = smf.ols('HDI ~ (LEB + EYS + np.log(GNIPC) + I(EYS**2)) * HDI_dum', data=onu).fit()
+
+
+modelo_dum.summary()
+
+from statsmodels.stats.anova import anova_lm
+
+anova_results = anova_lm(modelo_2, modelo_dum)
+print(anova_results)
+```
+
+Obtenemos un resultado significativo, es decir, no existe evidencia para rechazar la hipótesis de que ambos modelos tiene parámetros distintos.
+
+```{r}
+#5º
+summary(modelo_2)
+
+```
+
+```{python}
+modelo_2.summary()
+```
+
+Podemos observar que el p-valor del modelo es menor que 0.05, por tanto podemos suponer que al menos un coeficiente del modelo es no nulo, para ver como de bien se ajusta el modelo a los datos podemos observar el R\^2, que toma el valor de 0.9825, es decir, un 98.25% de la variabilidad de los datos es explicada por el modelo, hay un muy buen ajuste del modelo, es decir, existe una fuerte correlación entre HDI y la combinación lineal de variables del modelo. Por otra parte, la media de los residuos es cercana a 0, lo cual nos permite suponer la linealidad del modelo, además el error estandar del modelo es de 2.077, es decir, el modelo comete poco error al ajustar los datos.
+
+Para contrastar la significación individual de los parámetros basta observar el p-valor asociado a cada uno de los coeficientes, el cual es elr resultado de plantear el test de hipótesis H_0 el coeficiente es nulo, H_1 el ceficiente es no nulo. Podemos observar que todos los coeficientes tienen un p.valor menor que 0.05, por tanto tenemos evidencia suficiente como para rechazar la hipótesis nula y por tanto podemos suponer que todos los coeficietes son no nulos.
+
+```{r}
+
+plot(allEffects(modelo_2), grid=TRUE, rug=TRUE)
+
+```
+
+Podemos observar que tanto LEB como EYS y EYS\^2 tiene una relación lineal positiva con respecto a HDI, es decir, a mediad que aumentan dichas variables el valor de HDI aumenta de forma lineal, en cambio, en el caso de GNIPC el cambio se produce de forma logarítmica, es decir, cuando GNIPC toma valores pequeños un pequeño incremente de GNIPC supone un gran aumento de HDI pero a mediad que GNIPC va aumentando, el creciemiento de HDI se va reduciendo.
+
+```{r}
+
+valores_pred <- data.frame(LEB = 72.23, EYS = 13.33 , GNIPC = 12360.8)
+
+Hpred <- predict(modelo_2,valores_pred)
+
+print(Hpred)
+```
+
+```{python}
+mport pandas as pd
+import statsmodels.api as sm
+
+valores_pred = pd.DataFrame({'LEB': [72.23], 'EYS': [13.33], 'GNIPC': [12360.8]})
+
+
+valores_pred = sm.add_constant(valores_pred)
+
+Hpred = modelo_2.predict(valores_pred)
+
+print(Hpred)
+```
