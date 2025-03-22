@@ -1,0 +1,270 @@
+---
+title: "Trabajo_3_Econ:py"
+format: html
+---
+
+## Quarto
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+## Running Code
+
+When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+
+You can add options to executable code like this
+
+```{python}
+import pandas as pd
+import numpy as np
+import statsmodels.api as sm
+import statsmodels.formula.api as smf
+from statsmodels.stats.diagnostic import het_breuschpagan, het_white
+from statsmodels.stats.stattools import jarque_bera
+from statsmodels.sandbox.regression.predstd import wls_prediction_std
+from statsmodels.tsa.api import adfuller
+from statsmodels.stats.bgtest import breusch_godfrey
+from scipy.stats import chi2
+import matplotlib.pyplot as plt
+
+datos_china = pd.read_csv('QUIM_CHINA.csv')
+
+
+# Estudio de los datos:
+print(datos_china.describe())
+print(datos_china.columns)
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
+
+```{python}
+
+modelo1 = smf.ols(formula = "np.log(Y) ~ np.log(K) + np.log(L) + np.log(M)", data = datos_china)
+modelo_MCO = modelo1.fit()
+print(modelo_MCO.summary())
+```
+
+```{python}
+#Intervalos de confianza al 95%
+ci = modelo_MCO.conf_int(alpha=0.10)
+print(ci)
+
+```
+
+```{python}
+linear_restriction = "np.log(K) + np.log(L) + np.log(M) = 1"
+wald_results = modelo_MCO.wald_test(linear_restriction)
+print("\nTest for constant returns to scale:")
+print(wald_results)
+
+
+```
+
+```{python}
+# Test reset
+from statsmodels.stats.diagnostic import linear_reset
+reset_test = linear_reset(modelo_MCO, power=2)
+print(reset_test)
+```
+
+```{python}
+# Comparación Público vs Privado:
+publico = datos_china[datos_china['DPUB'] == 1]
+privado = datos_china[datos_china['DPUB'] == 0]
+
+modelo_publico = smf.ols(formula='np.log(Y) ~ np.log(K) + np.log(L) + np.log(M)', data=publico).fit()
+modelo_privado = smf.ols(formula='np.log(Y) ~ np.log(K) + np.log(L) + np.log(M)', data=privado).fit()
+
+print(modelo_publico.summary())
+print(modelo_privado.summary())
+
+```
+
+```{python}
+
+# Análisis de los residuos:
+
+residuals = modelo_MCO.resid
+jb_test = jarque_bera(residuals)
+jb_test
+```
+
+```{python}
+#Regresión cuantílica del modelo:
+
+import statsmodels.api as sm
+from statsmodels.regression.quantile_regression import QuantReg
+
+modelo_DAM = QuantReg(np.log(datos_china['Y']), np.log(datos_china[['K', 'L', 'M']])).fit()
+print(modelo_DAM.summary())
+
+# Quantile regression at various levels
+modelo_quantil_025 =  QuantReg(np.log(datos_china['Y']), np.log(datos_china[['K', 'L', 'M']])).fit(q=0.25)
+modelo_quantil_050 =  QuantReg(np.log(datos_china['Y']), np.log(datos_china[['K', 'L', 'M']])).fit(q=0.5)
+modelo_quantil_075 =  QuantReg(np.log(datos_china['Y']), np.log(datos_china[['K', 'L', 'M']])).fit(q=0.75)
+
+print(modelo_quantil_025.summary())
+print(modelo_quantil_050.summary())
+print(modelo_quantil_075.summary())
+
+```
+
+```{python}
+
+# Pruebas de Homocedasticidad:
+#Breusch-Pagan:
+
+bp_test = het_breuschpagan(residuals, modelo_MCO.model.exog)
+bp_test
+
+# White:
+
+white_test = het_white(residuals, modelo_MCO.model.exog)
+white_test
+
+```
+
+```{python}
+# Calculo del modelo MCP:
+
+datos_china['resid2'] = residuals**2
+modelo_residuos = smf.ols('np.log(resid2) ~ np.log(Y)', data=datos_china).fit()
+sigma2 = np.exp(modelo_residuos.fittedvalues)
+
+modelo_MCP = smf.wls('log_Y ~ log_K + log_L + log_M', data=datos_china, weights=1/sigma2).fit()
+print("Weighted least squares model:")
+print(modelo_MCP.summary())
+```
+
+```{python}
+
+# Pruebas de Homocedasticidad:
+#Breusch-Pagan:
+
+bp_test = het_breuschpagan(residuals, modelo_MCO.model.exog)
+bp_test
+
+# White:
+
+white_test = het_white(residuals, modelo_MCO.model.exog)
+white_test
+
+
+datos_china['resid2'] = residuals**2
+modelo_residuos = smf.ols('np.log(resid2) ~ log_Y', data=datos_china).fit()
+sigma2 = np.exp(modelo_residuos.fittedvalues)
+
+modelo_MCP = smf.wls('np.log(Y) ~ np.log(K) + np.log(L) + np.log(M)', data=datos_china, weights=1/sigma2).fit()
+print(modelo_MCP.summary())
+```
+
+```{python}
+
+import statsmodels.api as sm
+import statsmodels.stats.diagnostic as dg
+import statsmodels.formula.api as smf
+from statsmodels.tsa.api import lagmat
+from arch import arch_model
+
+#Leemos los datos:
+datos_gas = pd.read_csv('GASOL_CRUDO.csv')
+datos_gas['log_PGASOL'] = np.log(datos_gas['PGASOL'])
+datos_gas['log_PCRUDO'] = np.log(datos_gas['PCRUDO'])
+datos_gas['time'] = np.arange(len(datos_gas))  # Assuming data is sorted by time
+
+#Construimos el modelo:
+modelo_st = smf.ols(formula='log_PGASOL ~ D2008JD + log_PCRUDO + time', data=datos_gas).fit()
+print(modelo_st.summary())
+
+```
+
+```{python}
+# Test de Breusch-Godfrey:
+
+bg_test_1 = dg.acorr_breusch_godfrey(modelo_st, nlags=1)
+bg_test_2 = dg.acorr_breusch_godfrey(modelo_st, nlags=2)
+print(bg_test_1)
+print(bg_test_2)
+```
+
+```{python}
+
+#Cargamos los datos como una serie temporal y creamos el modelo dinámico:
+
+datos_gas_ts = pd.read_csv("GASOL_CRUDO.csv", parse_dates=['obs'], index_col='obs')
+datos_gas_ts.info()
+
+date_w = pd.date_range(start = '2000', 
+periods = len(datos_gas_ts.index), freq = 'W')
+datos_gas_ts.index = date_w
+datos_gas_ts.index
+
+datos_gas_ts['l_PGASOL'] = np.log(datos_gas_ts['PGASOL'])
+datos_gas_ts['l_PCRUDO'] = np.log(datos_gas_ts['PCRUDO'])
+form = 'l_PGASOL ~ D2008JD + time + l_PGASOL.shift(1) + l_PGASOL.shift(2) + l_PCRUDO + l_PCRUDO.shift(1) + l_PCRUDO.shift(2)'
+dyn_model = smf.ols(form, data = datos_gas_ts)
+lm_dyn_model = dyn_model.fit()
+print(lm_dyn_model.summary())
+
+```
+
+```{python}
+# Calculamos los efecto a corto y largo plazo:
+
+b6 = lm_dyn_model.params['l_PCRUDO']
+b7 = lm_dyn_model.params['l_PCRUDO.shift(1)']
+b8 = lm_dyn_model.params['l_PCRUDO.shift(2)']
+b4 = lm_dyn_model.params['l_PGASOL.shift(1)']
+b5 = lm_dyn_model.params['l_PGASOL.shift(2)']
+
+short_term_effect = b6
+long_term_effect = (b6 + b7 + b8) / (1 - b4 - b5)
+print(f"Efecto a corto plazo: {short_term_effect}")
+print(f"Efecto a largo plazo: {long_term_effect}")
+
+```
+
+```{python}
+# Calculamos el test de ARCH de orden 2:
+
+residuals = lm_dyn_model.resid
+arch_test = het_arch(residuals, nlags=2)
+print(f"Estadístico LM: {arch_test[0]}, p-valor: {arch_test[1]}")
+
+#Mostramos los residuos:
+plt.figure(figsize=(10, 6))
+plt.plot(residuals, label="Residuals")
+plt.title("Residuals Over Time")
+plt.xlabel("Time")
+plt.ylabel("Residuals")
+plt.legend()
+plt.show()
+
+```
+
+```{python}
+
+from arch import arch_model
+
+# Calculamos el modelo GARC
+garch_spec = arch_model(residuals, vol='Garch', p=2, q=0, mean='Zero', dist='normal')
+
+garch_fit = garch_spec.fit()
+print(garch_fit.summary())
+
+# Modelo GARCH para log(PCRUDO)
+garch_pcrudo = arch_model(np.log(datos_gas['PCRUDO']), vol='Garch', p=2, q=0, mean='Zero', dist='normal')
+garch_fit_pcrudo = garch_pcrudo.fit()
+print(garch_fit_pcrudo.summary())
+
+
+# Representamos la volatilidad condicional:
+
+volatility = garch_fit_pcrudo.conditional_volatility
+plt.figure(figsize=(10, 6))
+plt.plot(volatility, label="Conditional Volatility")
+plt.title("Conditional Volatility Over Time")
+plt.xlabel("Time")
+plt.ylabel("Volatility")
+plt.legend()
+plt.show()
+```

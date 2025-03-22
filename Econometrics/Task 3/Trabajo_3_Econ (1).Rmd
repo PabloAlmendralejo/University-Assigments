@@ -1,0 +1,264 @@
+---
+title: "Trabajo_3_Econ"
+author: "Yo"
+date: "2024-12-06"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+datos_china <- read.csv(file = 'QUIM_CHINA.csv')
+
+
+# Estudio de los datos:
+summary(datos_china)
+names(datos_china)
+
+# Modelo de regresión con transformaciones logarítmicas:
+modelo_MCO <- lm(log(Y) ~  log(K) + log(L) + log(M), data = datos_china)
+
+# Resumen del modelo:
+summary(modelo_MCO)
+```
+Podemos observar que el modelo resulta goblamente significativo, pues el p-valor es menor que 0.05.
+Por otra parte los parámetros beta_1, beta_2 y beta_3 resultan significativos por el mismo motivo
+
+```{r cars2}
+
+
+#Intervalo de Confianza al 95%:
+
+confint(modelo_MCO,level = 0.90)
+
+```
+El hecho de que beta_1 (K) esté con un 95% de probabilidad en un intervalo positivo implica que cuando aumente el capital humano en la producion en 1 unidad las ventas totales (Y) aumentaran entre 1.542743e-08 y 6.295395e-08 con un 95% de probabilidad. Un razonamiento similar se sigue con beta_2 (L) mientras que para beta_3 (M) cuando aumente la cantidad de material usada en el proceso productivo en 1 unidad las ventas totales (Y) disminuiran entre -7.691562e-08 y -9.869434e-09 con un 95% de probabilidad.
+
+
+
+```{r cars3}
+library(car)
+
+linearHypothesis(modelo_MCO, c("log(M) + log(K) + log(L) = 1"))
+
+```
+Obtenemos un resultado significativo, es decir, podemos suponer, con un 95% de probabilidad, que la suma de los tres coeficientes es igual a 1. Esto implica que la función de Cobb-DOuglas presenta rendimientos de escala constantes.
+
+
+######### 2)
+
+```{r cars4}
+library(lmtest)
+
+resettest(modelo_MCO, power = 1)
+
+```
+Elp-valor es mayor que 0.05. Esto significa que la forma funcional del modelo está bien especificada
+
+
+######### 3)
+
+
+```{r cars5}
+#publico <- datos_china[which(datos_china$DPUB == 1),]
+#privado <- datos_china[which(datos_china$DPUB == 0),]
+#modelo_publico <- lm( log(Y) ~ log(M) + log(K) + log(L), data = publico)
+modelo_chow <- lm( log(Y) ~ (log(M) + log(K) + log(L))*DPUB, data = datos_china)
+anova(modelo_chow,modelo_MCO)
+
+summary(modelo_chow)
+```
+
+Concluimos que existe suficiente evidencia como para rechazar la hipótesis de estabilidad paramétrica. Por tanto estudiaremos los modelos de regresión de ambas subclases
+
+```{r cars6}
+publico <- datos_china[which(datos_china$DPUB == 1),]
+privado <- datos_china[which(datos_china$DPUB == 0),]
+modelo_publico <- lm( log(Y) ~ log(M) + log(K) + log(L), data = publico)
+modelo_privado <- lm( log(Y) ~ log(M) + log(K) + log(L), data = privado)
+summary(modelo_publico)
+summary(modelo_privado)
+
+```
+
+En el caso de las empresas públicas las elasticidades estimadas siguen siendo significativas, pero su valor a pasado de ser proximo a 0, positivo en beta_2 y beta_3 y negativo e beta_4 a ser los 3 positivos y con mayores valores. Esto quiere decir que un cambio en el capital, el numero de empleados y la cantidad de material tienen un mayor efecto sobre las ventas totales.
+
+En el caso de las empresas privadas observamos una granaumento en la variabel beta_2, esto significa que un cambio en el capital de las empresas de propiedad privada tiene un mayor efecto en las ventas que en el conjunto de todas las empresas. En cambio, la variable beta_3 no varía mucho con respecto al modelo general.Por último beta_4 aumenta con respecto a las beta_4 del modelo general, eso significa que la cantidad de material empreado tiene un efecto positivo sobre las ventas, a diferencia del modelo general.
+
+
+
+######### 4)
+
+```{r cars7}
+# Calculamos los residuos:
+
+residuos <- residuals(modelo_MCO)
+
+library(tseries)
+
+jarque.bera.test(residuos)
+```
+
+Obtenemos un p-valor < 0.05, es decir, no podemos asumir normalidad de los residuos. Procedemos a calcular las estimaciones DAM del modelo.
+
+```{r cars8}
+# Aplicamos el modelo DAM:
+library(quantreg)
+library(tidyverse)
+library(car)
+library(lmtest)
+library(quantreg)
+library(MASS)
+library(moments)
+library(tseries)
+
+modelo_DAM <- rq( log(Y) ~ log(K) + log(L) + log(M), data = datos_china)
+
+summary(modelo_DAM)
+```
+beta_2 a pasado de tomar el valor 0.07 a 0.04, ha disminuido. beta_3 ha disminuido de 0.13 a 0.10 mientras que beta_4 ha aumentado de 0.77 a 084, es decir, en este nuevo ajuste el capital y el trabajo tienen menos imporancia sobre la cantidad de ventas mientras que la cantidad de material utilizado tiene una mayor influencia
+
+
+
+```{r cars9}
+
+
+modelo_quantil_025 <- rq(log(Y) ~   log(K) + log(L) + log(M), data = datos_china, tau = 0.25)
+modelo_quantil_050 <- rq(log(Y) ~   log(K) + log(L) + log(M), data = datos_china, tau = 0.50)
+modelo_quantil_075 <- rq(log(Y) ~   log(K) + log(L) + log(M), data = datos_china, tau = 0.75)
+
+summary(modelo_quantil_025)
+summary(modelo_quantil_050)
+summary(modelo_quantil_075)
+
+```
+
+######### 5)
+
+```{r cars10}
+library(skedastic)
+
+# Prueba de Breusch-Pagan
+breusch_pagan(modelo_MCO)
+
+# Prueba de White 
+white(modelo_MCO)
+```
+El contraste de White muestra que no podemos asumir que todas las varianzas de los residuos son iguales, por otra parte el contraste de Breusch Pagan indica que las varianzas de los residuos dependen de los valores de las variables independientes del modelo.
+
+```{r cars11}
+datos_china$resid2 = resid(modelo_MCO)^2
+modelo_residuos <- lm(log(resid2) ~ log(Y), data=datos_china)
+sigma2 <- exp(fitted(modelo_residuos))
+
+modelo_MCP <- lm( log(Y) ~ log(K) + log(L) + log(M),weight = 1/sigma2,  data = datos_china)
+
+summary(modelo_MCP)
+
+```
+Podemos observar que las estimaciones de las elasticidades son muy similares a las obtenidas a través del método de MCO
+
+
+
+
+
+######### 1)
+
+```{r cars12}
+
+datos_gas <- read.csv(file = "GASOL_CRUDO.csv")
+datos_gas_ts <- read.zoo(datos_gas)
+
+plot(datos_gas_ts)
+summary(datos_gas)
+names(datos_gas)
+
+library(dynlm)
+
+modelo_st <- dynlm(log(PGASOL) ~ D2008JD + log(PCRUDO) + time, data = datos_gas)
+
+#Contrastamos la presencua de autocorrelación en los residuos:
+
+library(skedastic)
+
+Godfrey_1 <- bgtest(log(PGASOL) ~ D2008JD + log(PCRUDO) + time,order = 1, data = datos_gas)
+
+Godfrey_2 <- bgtest(log(PGASOL) ~ D2008JD + log(PCRUDO) + time,order = 2, data = datos_gas)
+
+print(Godfrey_1)
+print(Godfrey_2)
+
+
+```
+Ambos tests muestran que existe autocorrelación entre los residuos, panto de orden 1 como de orden 2.
+
+
+####### 2)
+
+```{r car13}
+
+dyn_model <- dynlm(log(PGASOL) ~ D2008JD + time + L(log(PGASOL), 1:2) + L(log(PCRUDO),0:2), data=datos_gas_ts)
+
+summary(dyn_model)
+
+```
+
+
+
+
+
+```{r car14}
+
+library(nlWaldTest)
+
+nlConfint(dyn_model, c("b[6]","(b[6]+b[7]+b[8])/(1-b[4]-b[5])"))
+
+```
+observamos que beta_0 toma un valor de 0.15, esto quiere decir que a corto plazo cuando el valor del crudo aumente en una unidad el valor de la gasolina aumentará 0.15. 
+Por otra parte a largo plazo cuando el valor del crudo aumente en una unidad el valor de la gasolina aumentará en 0.73.
+
+```{r car15}
+library(FinTS)
+
+resid <- as.zoo(dyn_model$residuals)
+
+plot(resid)
+
+summary(dynlm(I(dyn_model$residuals^2) ~ L(I(dyn_model$residuals^2), 1:2)))
+
+ArchTest(dyn_model$residuals, lag = 2)
+
+```
+El test de Engle no nos permite confirmar la homocedastivcidad condicional de los residuos,por tanto podemos suponer que la varianza condicional de los residuos puede expresarse como función cuadrática de los residuos pasados. Reestimemos el modelo dinámico suponiendo que los errores siguen un proceso de ARCH(2).
+
+
+
+```{r car16}
+library(rugarch)
+resid_GARCH_spec <-  ugarchspec(
+  mean.model = list(armaOrder=c(0,0), include.mean = FALSE),
+  variance.model = list(model="sGARCH", garchOrder=c(2,0)),
+  distribution.model ="norm")
+resid_GARCH_fit <- ugarchfit(spec = resid_GARCH_spec, data = resid)
+show(resid_GARCH_fit)
+
+
+arch_model <- ugarchfit(spec = resid_GARCH_spec, data = log(datos_gas$PCRUDO))
+
+volatility <- sigma(arch_model)
+plot(volatility, type = "l", main = "Volatilidad Condicional", ylab = "Volatilidad", xlab = "Tiempo")
+
+```
+
+Se oberva una mayor volatilidad entre loctubre de 1970 y abril de 1971,para luego sufrir una acusada caida, que poco a poco va aumentando hasta noviembre de 1971.
+
