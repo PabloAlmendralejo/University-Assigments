@@ -1,0 +1,222 @@
+---
+title: "Trabajo_SYRM_Final"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r car}
+
+#a)
+
+library(readxl)
+datos_gastos <- load("EPFgastos_2023.RData")
+#datos_gastos <- load("C:/Users/shyam/Documents/TRABAJO/EPFgastos_2023.RData")
+head(datos_gastos)
+
+# Leer de Metadatos
+head(Metadatos)
+str(Metadatos)
+summary(Metadatos)
+
+# Leer de Microdatos
+head(Microdatos)
+str(Microdatos)
+summary(Microdatos)
+
+# Gran parte de los Gastonom son nulos
+sum(!is.na(Microdatos$GASTNOM1))
+sum(!is.na(Microdatos$GASTNOM2))
+sum(!is.na(Microdatos$GASTNOM3))
+sum(!is.na(Microdatos$GASTNOM4))
+sum(!is.na(Microdatos$GASTNOM5))
+
+
+#b)
+
+head(Microdatos$CODIGO)
+
+Microdatos$CODIGO2 <- substr(Microdatos$CODIGO, 1, 2)
+
+head(Microdatos$CODIGO2)
+
+#c)
+
+library(dplyr)
+
+EPF_G12_2023 <- Microdatos %>%
+  select(NUMERO, CODIGO2, GASTO, GASTOMON, FACTOR) %>%  
+  group_by(NUMERO, CODIGO2) %>%  
+  summarize(GTOTAL = sum(GASTO / FACTOR, na.rm = TRUE),GMONTOTAL = sum(GASTOMON / FACTOR, na.rm = TRUE)   
+  )
+head(EPF_G12_2023)
+
+#d)
+
+library(tidyr)
+
+EPF_G12T_2023_mejorado <- EPF_G12_2023 %>%
+  pivot_wider(
+    names_from = CODIGO2,     
+    values_from = c(GTOTAL, GMONTOTAL), 
+    names_glue = "{CODIGO2}_{.value}"   
+  )
+
+head(EPF_G12T_2023_mejorado)
+
+#Al fichero que sale de este apartado, en teoria julian 
+#segun el archivo quire que le llamemos  EPF_G12T_2023 
+#añadimos una T al anterior 
+
+#e)
+
+EPF_G12T_2023_mejorado_nax0 <- EPF_G12T_2023_mejorado %>%
+  mutate(across(where(is.numeric), ~replace_na(., 0)))
+
+EPF_G12T_2023_mejorado_nax0
+
+#aqui tenias puesto a la derecha del <- solo EPF_G12T_2023
+#por eso me daba error, pero poninedo el _mejorado ya si 
+#tiene sentido pues me lo hace del apartado anterior justo 
+#Y sale todo como tiene que salir en teoría 
+
+#f)
+
+# Calcular GTOTAL y GMONTOTAL desde Microdatos
+totales <- Microdatos %>%
+  group_by(NUMERO) %>%
+  summarize(
+    GTOTAL = sum(c_across(starts_with("GASTO")) / FACTOR, na.rm = TRUE),
+    GMONTOTAL = sum(c_across(starts_with("GASTOMON")) / FACTOR, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+# Unir los totales con el archivo EPF_G12T_2023_mejorado_nax0
+EPF_G12T_2023 <- EPF_G12T_2023_mejorado_nax0 %>%
+  left_join(totales, by = "NUMERO")  # Unir por el identificador del hogar (NUMERO)
+
+EPF_G12T_2023
+
+#en este aparatado, con el codigo que tu tenias puesto:
+
+#EPF_G12_2023 <- Microdatos %>%
+#  select(NUMERO, starts_with("GASTO"), starts_with("GASTOMON"), FACTOR) %>%  
+#  group_by(NUMERO) %>%  
+#  summarize(
+#    GTOTAL = sum(c_across(starts_with("GASTO")) / FACTOR, na.rm = TRUE),  
+#    GMONTOTAL = sum(c_across(starts_with("GASTOMON")) / FACTOR, na.rm = TRUE)  
+#  )
+
+#EPF_G12_2023
+
+#Me generaba solo un archivo con tres variables, y lo que yo necesitaba
+#para empezar el apartado G, es calcular esas dos variables y añadirlas al 
+#archivo anterior para tener las 20207 obs y 27 variables, que sino tendria
+#solo las 20207 obs pero solo tres varaibles. por eso lo he modificado un poco
+#este apartado. Lo que tu hacias antes es el archivo al que yo he llamado 
+# totales y depues lo he unido al ultimo que teniamos para poder seguir el g)
+
+
+#g)
+
+# Calcular la media por hogar del gasto total (GTOTAL)
+media_gasto_total <- mean(EPF_G12T_2023$GTOTAL, na.rm = TRUE)
+
+# Calcular la media por hogar para cada categoría de gasto
+# Seleccionar las columnas relevantes basadas en el formato "XX_GTOTAL"
+medias_por_codigo <- EPF_G12T_2023 %>%
+  ungroup() %>%  # Eliminar cualquier agrupación previa
+  select(matches("^\\d{2}_GTOTAL$")) %>%  # Seleccionar columnas con formato "XX_GTOTAL"
+  summarize(across(everything(), ~ mean(.x, na.rm = TRUE)))  # Calcular medias
+#me he ayudado con chat gpt de esta parte 
+
+# Calcular el total acumulado de todas las medias
+total_gasto_medias <- sum(medias_por_codigo, na.rm = TRUE)
+
+# Calcular la distribución porcentual del gasto medio por categoría
+# Dividir cada media de categoría por el total acumulado de todas las categorías
+distribucion_porcentual <- medias_por_codigo %>%
+  mutate(across(everything(), ~ . / total_gasto_medias * 100))  # Convertir a porcentaje correctamente
+
+# Mostrar resultados
+print("Media del gasto total por hogar (GTOTAL):")
+print(media_gasto_total)
+
+print("Medias por categoría de gasto:")
+print(medias_por_codigo)
+
+print("Distribución porcentual del gasto medio por categoría:")
+print(distribucion_porcentual)
+
+
+
+#h)
+
+# Cargar el archivo .RData
+load("EPFhogar_2023.RData")
+
+# Renombrar el data.frame al nombre solicitado
+EPF_HOGAR_2023 <- Microdatos  # Cambiar el nombre del data.frame cargado
+
+# Comprobar el contenido del data.frame
+print("Contenido de EPF_HOGAR_2023:")
+str(EPF_HOGAR_2023)  # Ver la estructura del data.frame
+summary(EPF_HOGAR_2023)  # Resumen de las variables
+
+
+
+#i)
+
+# Cargar el fichero EPFmhogar_2023.RData
+load("EPFmhogar_2023.RData")
+
+# Filtrar el subfichero Microdatos para obtener solo las observaciones donde SUSPRIN == 1
+EPF_MHOGAR_2023 <- Microdatos %>%
+  mutate(SUSPRIN = as.numeric(SUSPRIN)) %>%  # Asegurar que SUSPRIN sea numérica
+  filter(SUSPRIN == 1) %>%  # Filtrar por SUSPRIN == 1
+  select(NUMERO, everything())  # Seleccionar todas las variables relevantes
+
+# Comprobar el resultado
+print("Resumen del nuevo data frame EPF_MHOGAR_2023:")
+print(dim(EPF_MHOGAR_2023))  # Número de observaciones y variables
+print(str(EPF_MHOGAR_2023))  # Estructura del nuevo data frame
+
+# Verificar las primeras filas para revisar el contenido
+head(EPF_MHOGAR_2023)
+
+
+
+#j)
+
+# Fusionar EPF_HOGAR_2023 y EPF_MHOGAR_2023
+fusion_hogar <- EPF_HOGAR_2023 %>%
+  inner_join(EPF_MHOGAR_2023, by = "NUMERO")  # Usando NUMERO como clave
+
+# Fusionar el resultado anterior con EPF_G12T_2023
+EPF_2023 <- fusion_hogar %>%
+  inner_join(EPF_G12T_2023, by = "NUMERO")  # Usando NUMERO como clave
+
+# Verificar dimensiones y estructura del nuevo data frame
+print("Dimensiones del data frame EPF_2023:")
+print(dim(EPF_2023))  # Debe tener 20707 filas y 246 columnas
+print("Estructura del data frame EPF_2023:")
+print(str(EPF_2023))
+
+# Guardar como archivo .RData
+# save(EPF_2023, file = "C:/Users/shyam/Documents/TRABAJO/EPF_2023.RData")
+save(EPF_2023, file = "C:/Users/November/Documents/EPF_2023.RData")
+
+# Guardar como archivo .csv
+# write.csv(EPF_2023, "C:/Users/shyam/Documents/TRABAJO/EPF_2023.csv", row.names = FALSE)
+write.csv(EPF_2023, "C:/Users/November/Documents/EPF_2023.csv", row.names = FALSE)
+# Guardar como archivo .xlsx
+# install.packages("openxlsx")
+library(openxlsx)
+# write.xlsx(EPF_2023, "C:/Users/shyam/Documents/TRABAJO/EPF_2023.xlsx")
+write.xlsx(EPF_2023, "C:/Users/November/Documents/EPF_2023.xlsx")
+
+```
