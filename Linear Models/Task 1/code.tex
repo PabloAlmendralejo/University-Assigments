@@ -1,0 +1,226 @@
+\documentclass{article}
+\usepackage{graphicx} % Required for inserting images
+\usepackage{amssymb}
+\usepackage{amsmath}
+
+\title{Tarea 1 Modelos Lineales}
+\author{Pablo Borrego Ramos}
+\date{Marzo 2024}
+
+\begin{document}
+
+\maketitle
+
+\section{}
+
+\subsection{Enunciado}
+Supongamos que $\textbf{Y}$ se ajusta a un modelo lineal básico de rango completo, es decir, $E[\textbf{Y}] = \textbf{X} \beta $ y $Cov[\textbf{Y}] = \sigma^2 I_n$ siendo $\textbf{X} $ una matriz de orden $n \times p$ con $p < n$ y $r(\textbf{X}) = p$.  
+Supongamos que escribimos $\textbf{X} \beta = \textbf{X}_1 \delta_1 + \textbf{X}_2 \delta_2$ donde $\delta_1 \in \mathbb{R}^r$ y $\delta_2 \in \mathbb{R}^{p-r}$, $\textbf{X}_1$ es una matriz $n\times r$ y $\textbf{X}_2$ es una matriz $n\times(p-r)$. 
+$\newline$ 
+Probar que $\hat{\delta_1} = (\textbf{X}_1^t \textbf{X}_1)^{-1} \textbf{X}_1^t\textbf{X} $ y  $\hat{\delta_2} = (\textbf{X}_2^t \textbf{X}_2)^{-1} \textbf{X}_2^t \textbf{X}$ son estimadores insesgados para $\delta_1$ y $\delta_2$ respectivamente si y solo si $\textbf{X}_1^t \textbf{X}_2 = 0$, en cuyo caso $Cov[\hat{\delta_1},\hat{\delta_2}] = 0$ 
+
+\subsection{Respuesta}
+
+$\Rightarrow$ 
+$\newline$
+
+Si $E[\hat{\delta_1}] = \delta_1$ entonces $(\textbf{X}_1^t \textbf{X}_1)^{-1} \textbf{X}_1^t E[\textbf{Y}] = \delta_1$ simplificando la igualdad de la derecha llegamos a que $(\textbf{X}_1^t \textbf{X}_1)^{-1} \textbf{X}_1^t \textbf{X} \beta = (\textbf{X}_1^t \textbf{X}_1)^{-1} \textbf{X}_1^t (\textbf{X}_1 \delta_1 + \textbf{X}_2 \delta_2) = (\textbf{X}_1^t \textbf{X}_1)^{-1} (\textbf{X}_1^t \textbf{X}_1) \delta_1 + (\textbf{X}_1^t \textbf{X}_1)^{-1} (\textbf{X}_1^t \textbf{X}_2) \delta_2 = \textbf{I}_r \delta_1 + (\textbf{X}_1^t \textbf{X}_1)^{-1} (\textbf{X}_1^t \textbf{X}_2) \delta_2 = \delta_1$ realizando un procedimiento similar con la igualdad $E[\hat{\delta_2}] = \delta_2$ obtenemos $\textbf{I}_{p-r} \delta_2 + (\textbf{X}_2^t \textbf{X}_2)^{-1} (\textbf{X}_2^t \textbf{X}_1) \delta_1 = \delta_2$ llegando a un sistema de ecuaciones de la forma: 
+
+$\newline$ 
+
+$(\textbf{X}_1^t \textbf{X}_1)^{-1} (\textbf{X}_1^t \textbf{X}_2) \delta_1 =  0$
+
+$\newline$
+
+$(\textbf{X}_2^t \textbf{X}_2)^{-1} (\textbf{X}_2^t \textbf{X}_1) \delta_2 =  0$
+
+$\newline$ 
+
+Como $r(\textbf{X})  =  p $ entonces $\textbf{X}_1$ o $\textbf{X}_2$ debe de ser de rango máximo, y por lo tanto $(\textbf{X}_1^t \textbf{X}_1)^{-1}$ o $(\textbf{X}_2^t \textbf{X}_2)^{-1}$ es no nulo, por lo tanto para que se cumpla el sistema de ecuaciones debe de ocurrir que $(\textbf{X}_1^t \textbf{X}_2) = 0$ o $(\textbf{X}_2^t \textbf{X}_1) = 0 $ en el primer caso ya habríamos terminado, en el segundo si $(\textbf{X}_2^t \textbf{X}_1) = 0 $ entonces $(\textbf{X}_2^t \textbf{X}_1)^t = (\textbf{X}_1^t \textbf{X}_2) = 0 $. Ahora veamos que $Cov[\hat{\delta_1},\hat{\delta_2}] = 0$: 
+
+$\newline$
+
+$Cov[\hat{\delta_1},\hat{\delta_2}] = Cov[(\textbf{X}_1^t \textbf{X}_1)^{-1} \textbf{X}_1^t \textbf{X} ,(\textbf{X}_2^t \textbf{X}_2)^{-1} \textbf{X}_2^t \textbf{X}] = (\textbf{X}_1^t \textbf{X}_1)^{-1} \textbf{X}_1^t Cov[\textbf{X},\textbf{X}] \textbf{X}_2 ((\textbf{X}_2^t \textbf{X}_2)^{-1} )^t = (\textbf{X}_1^t \textbf{X}_1)^{-1} \textbf{X}_1^t \sigma^2 \textbf{I}_n \textbf{X}_2 ((\textbf{X}_2^t \textbf{X}_2)^{-1} )^t  = \sigma^2 (\textbf{X}_1^t \textbf{X}_1)^{-1} \textbf{X}_1^t 0_n \textbf{X}_2 ((\textbf{X}_2^t \textbf{X}_2)^{-1} )^t = 0$ donde la penúltima igualdad se debe a que $(\textbf{X}_1^t \textbf{X}_2) = 0$
+
+$\newline$
+
+$\Leftarrow$
+
+$\newline$
+
+Si  $(\textbf{X}_1^t \textbf{X}_2) = 0$ veamos que $E[\hat{\delta_1}] = \delta_1$:
+$\\$
+
+$E[\hat{\delta_1}] = (\textbf{X}_1^t \textbf{X}_1)^{-1} \textbf{X}_1^t \textbf{X} E[\textbf{Y}] = (\textbf{X}_1^t \textbf{X}_1)^{-1} \textbf{X}_1^t \textbf{X} \beta = (\textbf{X}_1^t \textbf{X}_1)^{-1} \textbf{X}_1^t (\textbf{X}_1 \delta_1 + \textbf{X}_2 \delta_2) =  (\textbf{X}_1^t \textbf{X}_1)^{-1} (\textbf{X}_1^t \textbf{X}_1) \delta_1 + (\textbf{X}_1^t \textbf{X}_1)^{-1} (\textbf{X}_1^t \textbf{X}_2) \delta_2 = \textbf{I}_r \delta_1 + (\textbf{X}_1^t \textbf{X}_1)^{-1} (\textbf{X}_1^t \textbf{X}_2) \delta_2 = \textbf{I}_r \delta_1 + 0_{p-r} \delta_2 = \delta_1$ donde la penúltima desigualdad se debe a que estamos suponiendo que $(\textbf{X}_1^t \textbf{X}_2) = 0$  
+
+
+\section{}
+
+\subsection{Enunciado}
+
+Supongamos que $\textbf{Y}$ se ajusta a un modelo lineal básico de rango completo, es decir, $E[\textbf{Y}] = \textbf{X} \beta$ y $Cov[\textbf{Y}] = \sigma^2 \textbf{I}_n$ siendo $\textbf{X} $ una matriz de orden $n \times p$ con $p < n$ y $r(\textbf{X}) = p$. Denotaremos por $\hat{\beta} = (\textbf{X}^t \textbf{X})^{-1} \textbf{X}^t \textbf{Y} $ al estimador de mínimos cuadrados de $\beta$. Si $\psi = \lambda^t \beta, \lambda \in \mathbb{R}$ es una función lineal de $\delta$, consideramos el estimador $\hat{\psi} = \lambda^t \hat{\beta}$.  
+ 
+$\\$
+a) Probar que $\hat{\psi}$ es un estimador insesgado para $\psi$ y calcular su varianza
+
+
+
+$\\$ b) Demostrar que $\hat{\psi}$ es el estimador insesgado de mínima varianza de $\psi$, en el sentido que si $T = c^t \textbf{X} , c \in \mathbb{R}^n $ es otro estimador lineal insesgado de $\psi$, entonces $Var[\hat{\psi}] \leq Var[T]$ y se da la igualdad si y solo si $ T = \hat{\psi}$
+
+
+\subsection{Respuesta}
+
+
+a) 
+
+
+$\\$ $E[\hat{\psi}] = E[\lambda^t \hat{\beta}] = \lambda^t E[\hat{\beta}] = \lambda^t (\textbf{X}^t \textbf{X})^{-1} \textbf{X}^t E[\textbf{Y}] = \lambda^t (\textbf{X}^t \textbf{X})^{-1} \textbf{X}^t \textbf{X} \beta = \lambda^t \beta = \psi$ 
+
+$\newline$
+$Var[\hat{\psi}] = \sum_{i=1}^{n} Var[\hat{\psi}_i] = tr(Cov[\hat{\psi}]) = tr(Cov[\lambda^t \hat{\beta}]) = tr(\lambda^t Cov[\hat{\beta}] \lambda) = tr(\lambda^t (\textbf{X}^t \textbf{X})^{-1} \textbf{X}^t Cov[\textbf{Y}]  ((\textbf{X}^t \textbf{X})^{-1} \textbf{X}^t)^t \lambda) = tr(\lambda^t (\textbf{X}^t \textbf{X})^{-1} \textbf{X}^t \sigma^2 \textbf{I}_n ((\textbf{X}^t \textbf{X})^{-1} \textbf{X}^t)^t \lambda) = tr(\lambda^t \sigma^2 (\textbf{X}^t \textbf{X})^{-1} \textbf{X}^t \textbf{X} ((\textbf{X}^t \textbf{X})^{-1})^t  \lambda) = \sigma^2 tr(\lambda^t (\textbf{X}^t \textbf{X})^{-1} \lambda) 
+$
+
+$\newline$
+b)
+
+Sea $T = c^t \textbf{Y}$ podemos reescribir $c$ de la forma $c = \lambda ^t (\textbf{X}^t \textbf{X})^{-1} \textbf{X}^t + b$ entonces para que $T$ sea insesgado debe de ocurrir que  $ \psi = E[T] = E[(\lambda^t (\textbf{X}^t \textbf{X})^{-1} \textbf{X}^t  + b ) \textbf{Y}] = E[\lambda^t (\textbf{X}^t \textbf{X})^{-1} \textbf{X}^t  \textbf{Y}] + E[b \textbf{Y}] $ = $E[\hat{\psi}]  + b\textbf{X}\beta$ = $\psi + b\textbf{X}\beta$ por lo tanto para que T sea insesgado debe de ocurrir que $b\textbf{X} = 0$. Teniendo esto en cuenta podemos calcular la matriz de Covarianzas del siguiente modo:
+$Cov[T] = c \cdot Cov[Y] \cdot c^t = \sigma^2 \cdot c \cdot c^t = \sigma^2 (\lambda ^t (\textbf{X}^t \textbf{X})^{-1} \textbf{X}^t + b) (\lambda ^t (\textbf{X}^t \textbf{X})^{-1} \textbf{X}^t + b)^t = \sigma^2 (\lambda (\textbf{X}^t \textbf{X})^{-1}\lambda^t + \lambda^t (\textbf{X}^t \textbf{X})^{-1} (b\textbf{X})^t + b \textbf{X} \lambda^t (\textbf{X}^t \textbf{X})^{-1}  + b\cdot b^t) = \sigma^2 (\lambda^t (\textbf{X}^t \textbf{X})^{-1} + b\cdot b^t)$.
+$\\$
+De este modo si $b=(b_1, ... b_n)$ tenemos que: $ECM(T) = tr(Cov[T]) = \sigma^2 tr(\lambda (\textbf{X}^t \textbf{X})^{-1}\lambda^t) + \sigma^2 tr(b\cdot b^t) = ECM(\psi) + \sigma^2 \sum_{i=1}^{n} b_i^2$. Concluimos que $ECM(T) \geq ECM(\psi)$ y se dará la igualdad si y solo si $\sum_{i=1}^{n} b_i^2 = 0$, es decir, $b = 0$
+
+
+\section{}
+
+\subsection{Enunciado}
+
+Supongamos que $\textbf{Y} \sim \mathcal{N}(\textbf{X}\beta, \sigma^2 \textbf{I}_n)$ donde $\textbf{X}$ es una matriz de orden $n \times p $ $(p <n) $ y $r(\textbf{X})= p$, es decir, $\textbf{Y}$ se ajusta a un modelo lineal normal de rango completo. Denotaremos por $\hat{\beta} = (\textbf{X}^t \textbf{X})^{-1} \textbf{X}^t \textbf{Y}$, al estimador de mínimos cuadrados y de máxima verosimilitud de $\beta$. Si $\psi = \lambda^t \beta$, $\lambda \in \mathbb{R}^p$ es una función lineal de $\beta$, consideramos el estimador $\hat{\psi} = \lambda^t \hat{\beta}$.
+
+$\\$
+a) Probar que $\hat{\psi} \sim \mathcal{N}(\psi,\sigma^2 \lambda^t(\textbf{X}^t \textbf{X})^{-1} \lambda) $
+
+$\\$
+b) Deducir un intervalo de confianza para $\psi$ al nivel de confianza $1 - \alpha $ $(0 < \alpha < 1).$
+
+\subsection{Respuesta}
+
+a) Primero estudiemos la distribución que sigue $\hat{\beta}$, como $\textbf{Y} \sim \mathcal{N}(\textbf{X}\beta, \sigma^2 \textbf{I}_n)$ y $\hat{\beta}$ es una transformación lineal de $\textbf{Y}$, tenemos que esta sigue una distribución $\mathcal{N}((\textbf{X}^t \textbf{X})^{-1} \textbf{X}^t \textbf{X}\beta,(\textbf{X}^t \textbf{X})^{-1} \textbf{X}^t \sigma^2 \textbf{I}_n \textbf{X}((\textbf{X}^t \textbf{X})^{-1} )^t) = \mathcal{N}(\beta,\sigma^2 (\textbf{X}^t \textbf{X})^{-1} ) $ y por tanto $\hat{\psi} = \lambda^t \hat{\beta}$ sigue una distribución $\mathcal{N}(\lambda^t \hat{\beta},\sigma^2 \lambda^t(\textbf{X}^t \textbf{X})^{-1} \lambda) =\mathcal{N}(\psi,\sigma^2 \lambda^t(\textbf{X}^t \textbf{X})^{-1} \lambda)$.
+
+$\\$
+b) Por el apartado anterior sabemos que $\hat{\psi} \sim \mathcal{N}(\psi,\sigma^2 \lambda^t(\textbf{X}^t \textbf{X})^{-1} \lambda) $. Tipificando obtenemos que $$\frac{\hat{\psi} - \psi}{\sqrt{\sigma^2 \lambda^t(\textbf{X}^t \textbf{X})^{-1} \lambda)}} \sim \mathcal{N}(0,1)$$ Por otro lado, por los apartados b) y c) de la Proposición $7$ del Tema $2$ sabemos que $\frac{(n-p)\hat{\sigma}^2}{\sigma^2} \sim \chi^2(n-p)$ y dicha variable es independiente de $\hat{\beta}$ y por lo tanto de cualquier combinación lineal suya, es decir $\hat{\psi}$. De todo ello se deduce que $$ \frac{\frac{\hat{\psi} - \psi}{\sqrt{\sigma^2 \lambda^t(\textbf{X}^t \textbf{X})^{-1} \lambda)}}}{\sqrt{\frac{(n-p)\hat{\sigma}^2}{(n-p)\sigma^2}}} = \frac{\hat{\psi} - \psi}{\sqrt{\sigma^2 \lambda^t(\textbf{X}^t \textbf{X})^{-1} \lambda)}} \sim t(n-p)$$ En consecuencia, si $t_{n-p,\alpha/2}$ es el cuantil de orden $1 - \alpha/2$ de la distribución $t(n-p)$ se verifica que $\mathit{P}(-t_{n-p,\alpha/2} \leq \frac{\hat{\psi} - \psi}{\sqrt{\hat{\sigma}^2 \lambda^t(\textbf{X}^t \textbf{X})^{-1} \lambda} } \leq t_{n-p,\alpha/2}) = 1 -\alpha$. Despejando $\psi$ obtenemos que $\mathit{P}(\hat{\psi} - \sqrt{\hat{\sigma}^2 \lambda^t(\textbf{X}^t \textbf{X})^{-1} \lambda} t_{n-p,\alpha/2} \leq  \psi \leq \hat{\psi} +  \sqrt{\hat{\sigma}^2 \lambda^t(\textbf{X}^t \textbf{X})^{-1} \lambda} t_{n-p,\alpha/2}) = 1 - \alpha$ y el ejercicio está completo.
+
+\section{}
+
+\subsection{Enunciado}
+
+Para estimar dos parámetros $\theta$ y $\Phi$ se realizan observaciones de tres tipos:
+\begin{enumerate}
+    \item[a)] m observaciones $Y_{11}, .... , Y_{1m}$ con media $\theta$
+    \item[b)] m observaciones $Y_{21}, .... , Y_{2m}$ con media $\theta + \Phi$ 
+    \item[c)] n observaciones $Y_{31}, .... , Y_{3n}$ con media $ \theta - 2\Phi$
+\end{enumerate}
+Todas las observaciones están sujetas a errores incorrelados de media $0$ y tienen varianza $\sigma^2$. Hallar los estimadores de mínimos cuadrados de $\theta$ y $\Phi$. Probar que dichos estimadores son incorrelados si y sólo si $m=2n$.
+
+\subsection{Respuesta}
+
+Sabemos que $E[Y_{1i}] = \theta  \ \forall i \in \{1, .. m\}$, $E[Y_{1i}] = \theta + \Phi \ \forall i \in \{1, .. m\} $  y $E[Y_{3i}] = \theta - 2\Phi \ \forall i \in \{1, .. n\}$. Construimos el vector $\textbf{Y} = (Y_{11}, .... , Y_{1m},Y_{21}, .... , Y_{2m}, Y_{31}, .... , Y_{3n})$ que nos permite expresar las igualdades anteriores de forma matricial: 
+
+\begin{equation}
+E[\textbf{Y}] = 
+\begin{pmatrix}
+1  & 0 & 0\\
+\vdots  & \vdots & \vdots\\
+1  & 0 & 0\\
+1  & 1 & 0\\
+\vdots & \vdots & \vdots\\
+1  & 1 & 0\\
+1  & 0 & 1\\
+\vdots & \vdots & \vdots\\
+1  & 0 & 1\\
+
+\end{pmatrix}
+\begin{pmatrix}
+\theta \\
+ \Phi\\
+- 2\Phi\\
+\end{pmatrix}
+= \textbf{X} \beta
+\end{equation}
+
+Para obtener el EMC de $\theta$ y $\Phi$ basta encontrar el EMC de $\beta$. Por la Proposición $1$ del Tema $2$ sabemos que el EMC de $\beta$ es de la forma $\hat{\beta} = (\textbf{X}^t \textbf{X})^{-1} \textbf{X}^t \textbf{Y} $. 
+Tras realizar los cálculos llegamos a que $\hat{\beta} = (\frac{1}{m} \sum_{i=1}^{m} Y_{1,i},\frac{1}{m} \sum_{i=1}^{m} Y_{1,i} + \frac{1}{m} \sum_{i=1}^{m} Y_{2,i}, \frac{1}{m} \sum_{i=1}^{m} Y_{1,i} + \frac{n}{m} \sum_{i=1}^{n} Y_{3,i} ) $
+y el EMC de $\theta$ será $\hat{\beta}_1 = \frac{1}{m} \sum_{i=1}^{m} Y_{1,i}$ mientras que el EMC de $\Phi$ será $\hat{\beta}_2 = \frac{1}{m} \sum_{i=1}^{m} Y_{1,i} + \frac{1}{m} \sum_{i=1}^{m} Y_{2,i}$
+
+\section{}
+
+\subsection{Enunciado}
+
+Supongamos que $\textbf{Y}$ se ajusta a un modelo lineal básico de rango completo, es decir, $E[\textbf{Y}] = \textbf{X} \beta $ y $Cov[\textbf{Y}] = \sigma^2 I_n$ siendo $\textbf{X} $ una matriz de orden $n \times p$ con $p < n$ y $r(\textbf{X}) = p$. Si definimos el vector $\textit{valores ajustados}$ como $\ \hat{\textbf{Y}} = (\hat{Y}_1, .. , \hat{Y}_n)^t = \textbf{X}\hat{\beta}$ y el vector de $\textit{residuos}$ como $\hat{e} = (e_1, .. ,e_n)^t = \textbf{Y} - \hat{\textbf{Y}}$. Se pide: 
+
+$\\$
+a) Calcular $E[\hat{\textbf{Y}}]$, $Cov[\hat{\textbf{Y}}]$, $E[\hat{e}]$ y $Cov[\hat{e}]$
+
+$\\$
+b) Probar que $\sum_{i=1}^{n} Var[\hat{\textbf{Y}}_i] = \sigma^2 p $ y que $\sum_{i=1}^{n} \hat{\textbf{Y}}_ie_i = 0 $
+
+\subsection{Respuesta}
+
+$\\$
+a)
+
+\begin{enumerate}
+    \item $E[\hat{\textbf{Y}}] = E[\textbf{X}\hat{\beta}] = \textbf{X}E[\hat{\beta}] = \textbf{X} \beta $ donde $\hat{\beta} = (\textbf{X}^t \textbf{X})^{-1} \textbf{X}^t \textbf{Y}$
+    \item $Cov[\hat{\textbf{Y}}] = Cov[\textbf{X}\hat{\beta}] = \textbf{X}Cov[\hat{\beta}] \textbf{X}^t = \textbf{X} (\textbf{X}^t \textbf{X})^{-1} \textbf{X}^t Cov[\textbf{Y}]\textbf{X}^t ((\textbf{X}^t \textbf{X})^{-1} \textbf{X}^t)^t = \sigma^2 \textbf{X} (\textbf{X}^t \textbf{X})^{-1} \textbf{X}^t $ 
+    \item $E[\hat{e}] = E[\textbf{Y} - \hat{\textbf{Y}}] =  E[\textbf{Y}] - E[\hat{\textbf{Y}}] = 0 $
+    \item $Cov[\hat{e}] = E[(\hat{e} - E[\hat[e]])(\hat{e} - E[\hat{e}])^t] = E[ee^t] = E[SEC]$ y por la Proposición $4$ del Tema $2$ sabemos que $E[SEC] = (n-p)\sigma^2$ por lo tanto $Cov[\hat{e}] = (n-p)\sigma^2$.
+\end{enumerate}
+
+$\\$
+b)
+
+$\sum_{i=1}^{n} Var[\hat{\textbf{Y}}_i] = tr(Cov[\hat{\textbf{Y}}]) = tr(\sigma^2 \textbf{X} (\textbf{X}^t \textbf{X})^{-1} \textbf{X}^t ) $ pero como se mencionó en clase la matriz $\textbf{X} (\textbf{X}^t \textbf{X})^{-1} \textbf{X}^t$ es idempotente:
+$$ (\textbf{X} (\textbf{X}^t \textbf{X})^{-1} \textbf{X}^t) (\textbf{X} (\textbf{X}^t \textbf{X})^{-1} \textbf{X}^t)^t = \textbf{X} (\textbf{X}^t \textbf{X})^{-1} \textbf{X}^t$$ y ademas es simétrica, por lo tanto por la propiedad d) de las matrices itempotentes del Tema $1$ tenemos que $r(\textbf{X} (\textbf{X}^t \textbf{X})^{-1} \textbf{X}^t) = tr(\textbf{X} (\textbf{X}^t \textbf{X})^{-1} \textbf{X}^t)$ , por la propiedad b) del rango del Tema $1$ sabemos que $r( \textbf{X}) = r(\textbf{X}^t \textbf{X}) = r( (\textbf{X}^t \textbf{X})^{-1}) $ por otra parte $\textbf{X}$ es no singular y por tanto invertible, por la propiedad a) de el mismo apartado sabemos que $r(A) = r(BA) = r(AC)$ con B y C matrices no singulares, por lo tanto como $ r(\textbf{X} (\textbf{X}^t \textbf{X})^{-1} \textbf{X}^t) = r(\textbf{X}) = p$, concluimos que $tr(\sigma^2 \textbf{X} (\textbf{X}^t \textbf{X})^{-1} \textbf{X}^t ) = \sigma^2 tr( \textbf{X} (\textbf{X}^t \textbf{X})^{-1} \textbf{X}^t ) = \sigma^2 r( \textbf{X} (\textbf{X}^t \textbf{X})^{-1} \textbf{X}^t ) = \sigma^2 p$
+
+$\\$
+Para demostrar que $\sum_{i=1}^{n} \hat{\textbf{Y}}_ie_i = 0 $ debemos de tener en cuenta que $\hat{\textbf{Y}} = H \textbf{Y}$ y que $\hat{e} = \textbf{Y} - \hat{\textbf{Y}} = (\textbf{I}_n - H)\hat{\textbf{Y}}$ donde $H = \textbf{X} (\textbf{X}^t \textbf{X})^{-1} \textbf{X}^t $, como sabemos que $H $ y $ \textbf{I}_n - H $ generan subespacios sobre $\mathbb{R}^n$ ortogonales concluimos que $(\textbf{I}_n - H)\hat{\textbf{Y}} $ y $H \textbf{Y}$ son vectores ortogonales.
+
+
+\section{}
+
+\subsection{Enunciado} 
+
+
+Sea $\textbf{Y} \sim \mathcal{N}(\mu,\textbf{V})$
+
+$\\$ 
+a) Si $\textbf{Z} = \textbf{A} \textbf{Y} + b$ con $\textbf{A}$ matriz $k \times n$ de rango $k$ $(k \leq n)$ y $b \in \mathbb{R}^k$, entonces  $\textbf{Z} \sim \mathcal{N}(\textbf{A} \mu + b,\textbf{A} \textbf{V}) \textbf{A}^t$.
+
+$\\$
+b) Probar que un vector aleatorio $\textbf{Y} = (Y_1, .. ,Y_n)^t \sim \mathcal{\mu, \textbf{V}}$ si y solo si para todo $\lambda \in \mathbb{R}^n$,  $\lambda^t \textbf{Y} \sim  \mathcal{N}(\lambda^t \mu, \lambda^t \textbf{V} \lambda^t) $ 
+
+\subsection{Respuesta}
+
+$\\$
+a) Sabemos que una v.a sigue una distribución normal cuando su función de momentos es de la forma: $M_X(t)= exp(t^T \mu + \frac{1}{2}t^TVt)$ donde $V$ es la matriz de covarianzas.
+Por otra parte la función de momentos de una v.a cualquiera es de la forma $M_R(t)= E[exp(t^Tx)]$, Veamos que $\textbf{Z}$ tiene una función de momentos de la primera forma:
+
+$\\$
+$M_Z(t)=E[exp(t^T(\textbf{A}x + b))] = E[exp(t^T(\textbf{A}x)) exp(t^Tb)] = exp(t^Tb) E[exp(t^TAx)] = exp(t^Tb) M_Y(\textbf{A}^Tt) = exp(t^T(\textbf{A} \mu + b) + \frac{1}{2} t^T \textbf{A} \textbf{V} \textbf{A}^T t)$
+
+Concluimos que $\textbf{Z}$ sigue una distribución normal
+
+$\\$
+b) 
+$\\$
+$\Rightarrow$
+
+Una v.a también queda determinada por su función característica, en el caso de una v.a con distribución normal, esta es: $\phi_Y(t) = exp(it\mu - \frac{1}{2} t^T \textbf{V} t)$, por otra parte la función característica de $\lambda^T \textbf{Y} = E[exp(it (\lambda^T \textbf{V}))] = E[exp(i(t\lambda^T) \textbf{V})] = exp(i(\lambda t)^T \mu -\frac{1}{2} (\lambda t)^T)\textbf{V} \lambda t = exp(i t (\lambda^T \mu) -\frac{1}{2} t (\lambda^T \textbf{V} \lambda) t = exp(i t (\lambda^T \mu) -\frac{1}{2} t^2 (\lambda^T \textbf{V} \lambda)$ Por la unicidad de la función característica concluimos que $\lambda^t \textbf{Y} \sim  \mathcal{N}(\lambda^t \mu, \lambda^t\textbf{V} \lambda^t)$ 
+Otra forma más cómoda de verlo es reducirnos al caso a), tomando $b = 0$ y $k = 1$
+
+$\\$
+$\Leftarrow$
+
+$\phi_Y(\beta) = E[exp(i\beta^T \textbf{Y})] $ tomando $\beta = \lambda t$ tenemos $= E[exp(i (t \lambda)^T \textbf{Y})] = E[exp(it  (\lambda^T \textbf{Y}))] = exp(i (\lambda t)^T \mu - \frac{1}{2} (\lambda t)^T \textbf{V} \lambda t) = exp(i (\beta)^T \mu - \frac{1}{2} (\beta)^T \textbf{V} \beta)$  y por la unicidad de la función caracteristica concluimos que $\textbf{Y} \sim \mathcal{N}(\mu,\textbf{V})$.
+
+
+
+\end{document}
