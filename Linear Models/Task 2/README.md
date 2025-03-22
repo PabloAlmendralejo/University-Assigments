@@ -1,4 +1,4 @@
-## Regression Analysis of Test Scores
+# Regression Analysis of Test Scores
 
 ### Overview
 
