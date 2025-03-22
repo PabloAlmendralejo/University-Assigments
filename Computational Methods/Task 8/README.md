@@ -1,4 +1,4 @@
-## Fortran Numerical Integration and Interpolation Program
+## Numerical Integration and Interpolation
 
 ### Overview
 This Fortran program performs numerical integration and interpolation using various methods. It includes implementations of the Trapezoidal Rule, Simpson's Rule, and Newton-Cotes Integration. The program is modular, with separate functions and subroutines for each method, making it easy to extend and reuse.
