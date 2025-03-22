@@ -1,4 +1,4 @@
-Copiar# Numerical Analysis of a 3D Autonomous System of Ordinary Differential Equations (ODEs)
+# Numerical Analysis of a 3D Autonomous System of Ordinary Differential Equations (ODEs)
 ## Overview
 This project focuses on the numerical analysis of a 3D autonomous system of ordinary differential equations (ODEs). The system is defined by the vector field:
 
