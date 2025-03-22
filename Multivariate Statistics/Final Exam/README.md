@@ -1,4 +1,4 @@
-markdownCopiar# Predicting Football Match Outcomes using Machine Learning
+# Predicting Football Match Outcomes using Machine Learning
 
 ## Overview
 This project applies various machine learning techniques to predict football match outcomes, specifically the number of goals scored by the home team (FTHG) and the final match result (FTR). The dataset consists of historical football match data.
